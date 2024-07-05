@@ -35,7 +35,7 @@ ENV PATH=$PATH:$JAVA_HOME/bin:$INSTALL_DIR/bin
 # Add k-NN lib directory to library loading path variable
 ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$INSTALL_DIR/plugins/opensearch-knn/lib"
 
-RUN yum install curl-minimal shadow-utils findutils hostname -y
+RUN yum install curl-minimal shadow-utils findutils hostname net-tools iproute -y
 
 RUN getent group $GROUP || groupadd -r -g 1000 $GROUP
 

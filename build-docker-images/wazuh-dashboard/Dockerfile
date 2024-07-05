@@ -82,7 +82,7 @@ ENV PATTERN="" \
     WAZUH_MONITORING_REPLICAS=""
 
 # Update and install dependencies
-RUN yum install shadow-utils -y
+RUN yum install shadow-utils net-tools iproute -y
 
 # Create wazuh-dashboard user and group
 RUN getent group $GROUP || groupadd -r -g 1000 $GROUP
