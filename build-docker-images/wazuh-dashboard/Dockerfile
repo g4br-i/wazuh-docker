@@ -3,37 +3,29 @@ FROM amazonlinux:2023 AS builder
 
 ARG WAZUH_VERSION
 ARG WAZUH_TAG_REVISION
-ARG INSTALL_DIR=/usr/share/wazuh-dashboard
 ARG WAZUH_UI_REVISION
+ARG INSTALL_DIR=/usr/share/wazuh-dashboard
 
 # Update and install dependencies
-RUN yum install curl-minimal libcap xz tar openssl -y
+RUN yum install curl-minimal libcap openssl -y
 
-# Create Install dir
-RUN mkdir -p $INSTALL_DIR
+COPY config/check_repository.sh /
+RUN chmod 775 /check_repository.sh && \
+    source /check_repository.sh
 
-# Download and extract Wazuh dashboard base
-COPY config/dl_base.sh .
-RUN bash dl_base.sh
-
-# Generate certificates
-COPY config/config.sh .
-COPY config/config.yml /
-RUN bash config.sh
-
-COPY config/install_wazuh_app.sh /
-RUN chmod 775 /install_wazuh_app.sh
-RUN bash /install_wazuh_app.sh
-
-# Copy and set permissions to config files
-COPY config/opensearch_dashboards.yml $INSTALL_DIR/config/
-COPY config/wazuh.yml $INSTALL_DIR/data/wazuh/config/
-RUN chmod 664 $INSTALL_DIR/config/opensearch_dashboards.yml
+RUN yum install wazuh-dashboard-${WAZUH_VERSION}-${WAZUH_TAG_REVISION} -y && \
+    yum clean all
 
 # Create and set permissions to data directories
 RUN mkdir -p $INSTALL_DIR/data/wazuh && chmod -R 775 $INSTALL_DIR/data/wazuh
 RUN mkdir -p $INSTALL_DIR/data/wazuh/config && chmod -R 775 $INSTALL_DIR/data/wazuh/config
 RUN mkdir -p $INSTALL_DIR/data/wazuh/logs && chmod -R 775 $INSTALL_DIR/data/wazuh/logs
+COPY config/wazuh.yml $INSTALL_DIR/data/wazuh/config/
+
+# Generate certificates
+COPY config/config.sh .
+COPY config/config.yml /
+RUN bash config.sh
 
 ################################################################################
 # Build stage 1 (the current Wazuh dashboard image):
