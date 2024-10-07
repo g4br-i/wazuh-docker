@@ -81,7 +81,7 @@ ENV PATTERN="" \
     WAZUH_MONITORING_REPLICAS=""
 
 # Update and install dependencies
-RUN yum install shadow-utils -y
+RUN yum install shadow-utils iproute net-tools sudo procps -y
 
 # Create wazuh-dashboard user and group
 RUN getent group $GROUP || groupadd -r -g 1000 $GROUP
@@ -116,3 +116,5 @@ USER wazuh-dashboard
 EXPOSE 443
 
 ENTRYPOINT [ "/entrypoint.sh" ]
+
+USER root

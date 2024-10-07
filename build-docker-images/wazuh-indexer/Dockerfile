@@ -36,7 +36,7 @@ ENV USER="wazuh-indexer" \
     NAME="wazuh-indexer" \
     INSTALL_DIR="/usr/share/wazuh-indexer"
 
-RUN yum install curl-minimal shadow-utils findutils hostname -y
+RUN yum install curl-minimal shadow-utils findutils hostname iproute net-tools sudo procps -y
 
 RUN getent group $GROUP || groupadd -r -g 1000 $GROUP
 
@@ -74,11 +74,16 @@ RUN mkdir -p /var/lib/wazuh-indexer && chown 1000:1000 /var/lib/wazuh-indexer &&
     chmod 600 /usr/share/wazuh-indexer/jvm.options && \
     chmod 600 /usr/share/wazuh-indexer/opensearch.yml
 
+# Add user to sudoers group and configure passwordless sudo
+RUN echo "$USER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
 USER wazuh-indexer
 
 # Services ports
 EXPOSE 9200
 
 ENTRYPOINT ["/entrypoint.sh"]
+
+USER root
 # Dummy overridable parameter parsed by entrypoint
 CMD ["opensearchwrapper"]
